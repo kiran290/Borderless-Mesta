@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Polly;
 using Polly.Extensions.Http;
 using StablecoinPayments.Core.Interfaces;
@@ -25,25 +26,29 @@ public static class ServiceCollectionExtensions
         // Register Mesta provider if enabled
         if (settings.Mesta.Enabled)
         {
-            services.AddHttpClient<IPaymentProvider, MestaPaymentProvider>("Mesta", client =>
+            services.AddHttpClient<MestaPaymentProvider>("Mesta", client =>
             {
                 client.BaseAddress = new Uri(settings.Mesta.BaseUrl);
                 client.Timeout = TimeSpan.FromSeconds(settings.Mesta.TimeoutSeconds);
             })
             .AddPolicyHandler(GetRetryPolicy(settings.Mesta.RetryAttempts))
             .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            services.AddSingleton<IPaymentProvider>(sp => sp.GetRequiredService<MestaPaymentProvider>());
         }
 
         // Register Borderless provider if enabled
         if (settings.Borderless.Enabled)
         {
-            services.AddHttpClient<IPaymentProvider, BorderlessPaymentProvider>("Borderless", client =>
+            services.AddHttpClient<BorderlessPaymentProvider>("Borderless", client =>
             {
                 client.BaseAddress = new Uri(settings.Borderless.BaseUrl);
                 client.Timeout = TimeSpan.FromSeconds(settings.Borderless.TimeoutSeconds);
             })
             .AddPolicyHandler(GetRetryPolicy(settings.Borderless.RetryAttempts))
             .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            services.AddSingleton<IPaymentProvider>(sp => sp.GetRequiredService<BorderlessPaymentProvider>());
         }
 
         // Register factory and services
@@ -59,11 +64,7 @@ public static class ServiceCollectionExtensions
             .HandleTransientHttpError()
             .WaitAndRetryAsync(
                 retryCount,
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                onRetry: (outcome, timespan, retryAttempt, context) =>
-                {
-                    // Log retry attempts if needed
-                });
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
     }
 
     private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
