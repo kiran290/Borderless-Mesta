@@ -28,10 +28,35 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "Payments API",
         Version = "v1",
-        Description = "Multi-provider stablecoin to fiat payout API supporting Mesta and Borderless providers.",
+        Description = "Multi-provider stablecoin to fiat payout API supporting Mesta and Borderless providers with customer onboarding and KYC/KYB verification.",
         Contact = new Microsoft.OpenApi.Models.OpenApiContact
         {
             Name = "Payments Team"
+        }
+    });
+
+    // Add API Key authentication to Swagger
+    options.AddSecurityDefinition("ApiKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "API Key authentication. Enter your API key in the field below.",
+        Name = "X-API-Key",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "ApiKeyScheme"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
+                }
+            },
+            Array.Empty<string>()
         }
     });
 
@@ -60,6 +85,9 @@ builder.Services.AddCors(options =>
 // Add Health Checks
 builder.Services.AddHealthChecks();
 
+// Add API Key Authentication
+builder.Services.AddApiKeyAuthentication(builder.Configuration);
+
 // Add Payout Services
 builder.Services.AddPayoutServices(builder.Configuration);
 
@@ -83,6 +111,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
+app.UseApiKeyAuthentication();
 app.UseAuthorization();
 
 // Map health check endpoint

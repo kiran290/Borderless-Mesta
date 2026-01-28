@@ -50,6 +50,7 @@ public static class ServiceCollectionExtensions
         // Register core services
         services.AddSingleton<IPayoutProviderFactory, PayoutProviderFactory>();
         services.AddScoped<IPayoutService, PayoutService>();
+        services.AddScoped<ICustomerService, CustomerService>();
 
         return services;
     }
@@ -69,7 +70,16 @@ public static class ServiceCollectionExtensions
         .AddPolicyHandler(GetRetryPolicy(settings.RetryAttempts))
         .AddPolicyHandler(GetCircuitBreakerPolicy());
 
+        services.AddHttpClient<MestaCustomerProvider>(client =>
+        {
+            client.BaseAddress = new Uri(settings.BaseUrl.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+        })
+        .AddPolicyHandler(GetRetryPolicy(settings.RetryAttempts))
+        .AddPolicyHandler(GetCircuitBreakerPolicy());
+
         services.AddSingleton<IPayoutProvider, MestaPayoutProvider>();
+        services.AddSingleton<ICustomerProvider, MestaCustomerProvider>();
         services.AddSingleton<IWebhookHandler>(sp => sp.GetRequiredService<IPayoutProvider>() as MestaPayoutProvider
             ?? throw new InvalidOperationException("MestaPayoutProvider not registered"));
 
@@ -91,7 +101,16 @@ public static class ServiceCollectionExtensions
         .AddPolicyHandler(GetRetryPolicy(settings.RetryAttempts))
         .AddPolicyHandler(GetCircuitBreakerPolicy());
 
+        services.AddHttpClient<BorderlessCustomerProvider>(client =>
+        {
+            client.BaseAddress = new Uri(settings.BaseUrl.TrimEnd('/') + "/");
+            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+        })
+        .AddPolicyHandler(GetRetryPolicy(settings.RetryAttempts))
+        .AddPolicyHandler(GetCircuitBreakerPolicy());
+
         services.AddSingleton<IPayoutProvider, BorderlessPayoutProvider>();
+        services.AddSingleton<ICustomerProvider, BorderlessCustomerProvider>();
         services.AddSingleton<IWebhookHandler>(sp =>
         {
             var providers = sp.GetServices<IPayoutProvider>();
