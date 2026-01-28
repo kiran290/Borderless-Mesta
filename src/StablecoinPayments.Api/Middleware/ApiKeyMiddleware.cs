@@ -8,22 +8,29 @@ namespace StablecoinPayments.Api.Middleware;
 public sealed class ApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly AuthenticationSettings _settings;
     private readonly ILogger<ApiKeyMiddleware> _logger;
+
+    // Default excluded paths (always excluded)
+    private static readonly string[] DefaultExcludedPaths =
+    [
+        "/health",
+        "/swagger",
+        "/favicon"
+    ];
 
     public ApiKeyMiddleware(
         RequestDelegate next,
-        IOptions<AuthenticationSettings> settings,
         ILogger<ApiKeyMiddleware> logger)
     {
         _next = next;
-        _settings = settings.Value;
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, IOptionsSnapshot<AuthenticationSettings> settings)
     {
-        if (!_settings.ApiKey.Enabled)
+        var authSettings = settings.Value;
+
+        if (!authSettings.ApiKey.Enabled)
         {
             await _next(context);
             return;
@@ -31,15 +38,22 @@ public sealed class ApiKeyMiddleware
 
         var path = context.Request.Path.Value?.ToLower() ?? string.Empty;
 
-        // Check excluded paths
-        if (_settings.ApiKey.ExcludedPaths.Any(p => path.StartsWith(p.ToLower())))
+        // Check default excluded paths first
+        if (DefaultExcludedPaths.Any(p => path.StartsWith(p)))
+        {
+            await _next(context);
+            return;
+        }
+
+        // Check configured excluded paths
+        if (authSettings.ApiKey.ExcludedPaths.Any(p => path.StartsWith(p.ToLower())))
         {
             await _next(context);
             return;
         }
 
         // Get API key from header
-        if (!context.Request.Headers.TryGetValue(_settings.ApiKey.HeaderName, out var apiKeyValue))
+        if (!context.Request.Headers.TryGetValue(authSettings.ApiKey.HeaderName, out var apiKeyValue))
         {
             _logger.LogWarning("API key missing from request to {Path}", path);
             await WriteUnauthorizedResponse(context, "API key is required");
@@ -49,7 +63,7 @@ public sealed class ApiKeyMiddleware
         var apiKey = apiKeyValue.ToString();
 
         // Validate API key
-        if (!_settings.ApiKey.ApiKeys.TryGetValue(apiKey, out var keyConfig) || !keyConfig.IsActive)
+        if (!authSettings.ApiKey.ApiKeys.TryGetValue(apiKey, out var keyConfig) || !keyConfig.IsActive)
         {
             _logger.LogWarning("Invalid API key used for request to {Path}", path);
             await WriteUnauthorizedResponse(context, "Invalid API key");
