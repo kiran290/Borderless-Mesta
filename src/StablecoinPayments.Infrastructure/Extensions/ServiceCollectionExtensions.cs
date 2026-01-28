@@ -19,7 +19,6 @@ public static class ServiceCollectionExtensions
     {
         // Bind configuration
         services.Configure<PaymentSettings>(configuration.GetSection("Payment"));
-        services.Configure<AuthenticationSettings>(configuration.GetSection("Authentication"));
 
         var settings = configuration.GetSection("Payment").Get<PaymentSettings>() ?? new PaymentSettings();
 

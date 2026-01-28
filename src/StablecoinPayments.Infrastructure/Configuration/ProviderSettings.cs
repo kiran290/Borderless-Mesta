@@ -34,25 +34,3 @@ public sealed class BorderlessSettings
     public int RetryAttempts { get; set; } = 3;
     public bool Enabled { get; set; } = true;
 }
-
-public sealed class AuthenticationSettings
-{
-    public ApiKeySettings ApiKey { get; set; } = new();
-}
-
-public sealed class ApiKeySettings
-{
-    public bool Enabled { get; set; } = true;
-    public string HeaderName { get; set; } = "X-API-Key";
-    public List<string> ExcludedPaths { get; set; } = ["/health", "/swagger"];
-    public Dictionary<string, ApiKeyConfig> ApiKeys { get; set; } = new();
-}
-
-public sealed class ApiKeyConfig
-{
-    public string Name { get; set; } = string.Empty;
-    public string ClientId { get; set; } = string.Empty;
-    public List<string> Scopes { get; set; } = [];
-    public int RateLimitPerMinute { get; set; } = 100;
-    public bool IsActive { get; set; } = true;
-}
