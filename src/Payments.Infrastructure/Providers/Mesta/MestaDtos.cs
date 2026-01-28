@@ -521,3 +521,299 @@ public sealed class MestaWebhookPayload
 }
 
 #endregion
+
+#region Customer
+
+/// <summary>
+/// Request to create a customer.
+/// </summary>
+internal sealed class MestaCreateCustomerRequest
+{
+    [JsonPropertyName("type")]
+    public string? Type { get; init; }
+
+    [JsonPropertyName("firstName")]
+    public string? FirstName { get; init; }
+
+    [JsonPropertyName("lastName")]
+    public string? LastName { get; init; }
+
+    [JsonPropertyName("businessName")]
+    public string? BusinessName { get; init; }
+
+    [JsonPropertyName("email")]
+    public string? Email { get; init; }
+
+    [JsonPropertyName("phone")]
+    public string? Phone { get; init; }
+
+    [JsonPropertyName("dateOfBirth")]
+    public string? DateOfBirth { get; init; }
+
+    [JsonPropertyName("address")]
+    public MestaAddress? Address { get; init; }
+
+    [JsonPropertyName("externalId")]
+    public string? ExternalId { get; init; }
+
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; init; }
+}
+
+/// <summary>
+/// Request to update a customer.
+/// </summary>
+internal sealed class MestaUpdateCustomerRequest
+{
+    [JsonPropertyName("firstName")]
+    public string? FirstName { get; init; }
+
+    [JsonPropertyName("lastName")]
+    public string? LastName { get; init; }
+
+    [JsonPropertyName("businessName")]
+    public string? BusinessName { get; init; }
+
+    [JsonPropertyName("email")]
+    public string? Email { get; init; }
+
+    [JsonPropertyName("phone")]
+    public string? Phone { get; init; }
+
+    [JsonPropertyName("address")]
+    public MestaAddress? Address { get; init; }
+
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; init; }
+}
+
+/// <summary>
+/// Customer response from Mesta API.
+/// </summary>
+internal sealed class MestaCustomerResponse
+{
+    [JsonPropertyName("id")]
+    public required string Id { get; init; }
+
+    [JsonPropertyName("type")]
+    public string? Type { get; init; }
+
+    [JsonPropertyName("firstName")]
+    public string? FirstName { get; init; }
+
+    [JsonPropertyName("lastName")]
+    public string? LastName { get; init; }
+
+    [JsonPropertyName("businessName")]
+    public string? BusinessName { get; init; }
+
+    [JsonPropertyName("email")]
+    public required string Email { get; init; }
+
+    [JsonPropertyName("phone")]
+    public string? Phone { get; init; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; init; }
+
+    [JsonPropertyName("createdAt")]
+    public DateTimeOffset CreatedAt { get; init; }
+
+    [JsonPropertyName("updatedAt")]
+    public DateTimeOffset UpdatedAt { get; init; }
+}
+
+/// <summary>
+/// Customer list response from Mesta API.
+/// </summary>
+internal sealed class MestaCustomerListResponse
+{
+    [JsonPropertyName("items")]
+    public IReadOnlyList<MestaCustomerResponse> Items { get; init; } = [];
+
+    [JsonPropertyName("totalCount")]
+    public int TotalCount { get; init; }
+
+    [JsonPropertyName("page")]
+    public int Page { get; init; }
+
+    [JsonPropertyName("pageSize")]
+    public int PageSize { get; init; }
+}
+
+/// <summary>
+/// Order list response from Mesta API.
+/// </summary>
+internal sealed class MestaOrderListResponse
+{
+    [JsonPropertyName("items")]
+    public IReadOnlyList<MestaOrderResponse> Items { get; init; } = [];
+
+    [JsonPropertyName("totalCount")]
+    public int TotalCount { get; init; }
+
+    [JsonPropertyName("page")]
+    public int Page { get; init; }
+
+    [JsonPropertyName("pageSize")]
+    public int PageSize { get; init; }
+}
+
+#endregion
+
+#region KYC/KYB
+
+/// <summary>
+/// KYC initiation request.
+/// </summary>
+internal sealed class MestaKycRequest
+{
+    [JsonPropertyName("customerId")]
+    public required string CustomerId { get; init; }
+
+    [JsonPropertyName("level")]
+    public string? Level { get; init; }
+
+    [JsonPropertyName("redirectUrl")]
+    public string? RedirectUrl { get; init; }
+
+    [JsonPropertyName("webhookUrl")]
+    public string? WebhookUrl { get; init; }
+}
+
+/// <summary>
+/// KYB initiation request.
+/// </summary>
+internal sealed class MestaKybRequest
+{
+    [JsonPropertyName("customerId")]
+    public required string CustomerId { get; init; }
+
+    [JsonPropertyName("level")]
+    public string? Level { get; init; }
+
+    [JsonPropertyName("redirectUrl")]
+    public string? RedirectUrl { get; init; }
+
+    [JsonPropertyName("webhookUrl")]
+    public string? WebhookUrl { get; init; }
+}
+
+/// <summary>
+/// KYC initiation response.
+/// </summary>
+internal sealed class MestaKycResponse
+{
+    [JsonPropertyName("sessionId")]
+    public required string SessionId { get; init; }
+
+    [JsonPropertyName("verificationUrl")]
+    public required string VerificationUrl { get; init; }
+
+    [JsonPropertyName("expiresAt")]
+    public DateTimeOffset? ExpiresAt { get; init; }
+}
+
+/// <summary>
+/// KYB initiation response.
+/// </summary>
+internal sealed class MestaKybResponse
+{
+    [JsonPropertyName("sessionId")]
+    public required string SessionId { get; init; }
+
+    [JsonPropertyName("verificationUrl")]
+    public required string VerificationUrl { get; init; }
+
+    [JsonPropertyName("expiresAt")]
+    public DateTimeOffset? ExpiresAt { get; init; }
+}
+
+/// <summary>
+/// Verification status response.
+/// </summary>
+internal sealed class MestaVerificationStatusResponse
+{
+    [JsonPropertyName("status")]
+    public string? Status { get; init; }
+
+    [JsonPropertyName("level")]
+    public string? Level { get; init; }
+
+    [JsonPropertyName("kycCompleted")]
+    public bool KycCompleted { get; init; }
+
+    [JsonPropertyName("kybCompleted")]
+    public bool KybCompleted { get; init; }
+
+    [JsonPropertyName("rejectionReason")]
+    public string? RejectionReason { get; init; }
+
+    [JsonPropertyName("submittedAt")]
+    public DateTimeOffset? SubmittedAt { get; init; }
+
+    [JsonPropertyName("completedAt")]
+    public DateTimeOffset? CompletedAt { get; init; }
+
+    [JsonPropertyName("expiresAt")]
+    public DateTimeOffset? ExpiresAt { get; init; }
+}
+
+/// <summary>
+/// Document upload request.
+/// </summary>
+internal sealed class MestaDocumentUploadRequest
+{
+    [JsonPropertyName("documentType")]
+    public required string DocumentType { get; init; }
+
+    [JsonPropertyName("documentNumber")]
+    public string? DocumentNumber { get; init; }
+
+    [JsonPropertyName("issuingCountry")]
+    public string? IssuingCountry { get; init; }
+
+    [JsonPropertyName("issueDate")]
+    public string? IssueDate { get; init; }
+
+    [JsonPropertyName("expiryDate")]
+    public string? ExpiryDate { get; init; }
+
+    [JsonPropertyName("frontImage")]
+    public required string FrontImage { get; init; }
+
+    [JsonPropertyName("backImage")]
+    public string? BackImage { get; init; }
+
+    [JsonPropertyName("mimeType")]
+    public required string MimeType { get; init; }
+}
+
+/// <summary>
+/// Document response.
+/// </summary>
+internal sealed class MestaDocumentResponse
+{
+    [JsonPropertyName("id")]
+    public required string Id { get; init; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; init; }
+
+    [JsonPropertyName("documentType")]
+    public string? DocumentType { get; init; }
+
+    [JsonPropertyName("uploadedAt")]
+    public DateTimeOffset UploadedAt { get; init; }
+}
+
+/// <summary>
+/// Document list response.
+/// </summary>
+internal sealed class MestaDocumentListResponse
+{
+    [JsonPropertyName("documents")]
+    public IReadOnlyList<MestaDocumentResponse> Documents { get; init; } = [];
+}
+
+#endregion

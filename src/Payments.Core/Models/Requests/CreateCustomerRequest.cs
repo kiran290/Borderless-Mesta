@@ -104,3 +104,85 @@ public sealed class AddBankAccountRequest
     /// </summary>
     public bool SetAsPrimary { get; init; }
 }
+
+/// <summary>
+/// Request to list customers with filters.
+/// </summary>
+public sealed class CustomerListRequest
+{
+    /// <summary>
+    /// Filter by customer type.
+    /// </summary>
+    public CustomerType? Type { get; init; }
+
+    /// <summary>
+    /// Filter by customer status.
+    /// </summary>
+    public CustomerStatus? Status { get; init; }
+
+    /// <summary>
+    /// Filter by customer role.
+    /// </summary>
+    public CustomerRole? Role { get; init; }
+
+    /// <summary>
+    /// Filter by verification status.
+    /// </summary>
+    public VerificationStatus? VerificationStatus { get; init; }
+
+    /// <summary>
+    /// Search by email or name.
+    /// </summary>
+    public string? Search { get; init; }
+
+    /// <summary>
+    /// Page number (1-based).
+    /// </summary>
+    public int Page { get; init; } = 1;
+
+    /// <summary>
+    /// Page size.
+    /// </summary>
+    public int PageSize { get; init; } = 20;
+}
+
+/// <summary>
+/// Request to list payouts with filters.
+/// </summary>
+public sealed class PayoutListRequest
+{
+    /// <summary>
+    /// Filter by customer ID.
+    /// </summary>
+    public string? CustomerId { get; init; }
+
+    /// <summary>
+    /// Filter by payout status.
+    /// </summary>
+    public PayoutStatus? Status { get; init; }
+
+    /// <summary>
+    /// Filter by fiat currency.
+    /// </summary>
+    public FiatCurrency? Currency { get; init; }
+
+    /// <summary>
+    /// Filter by start date.
+    /// </summary>
+    public DateTime? FromDate { get; init; }
+
+    /// <summary>
+    /// Filter by end date.
+    /// </summary>
+    public DateTime? ToDate { get; init; }
+
+    /// <summary>
+    /// Page number (1-based).
+    /// </summary>
+    public int Page { get; init; } = 1;
+
+    /// <summary>
+    /// Page size.
+    /// </summary>
+    public int PageSize { get; init; } = 20;
+}
