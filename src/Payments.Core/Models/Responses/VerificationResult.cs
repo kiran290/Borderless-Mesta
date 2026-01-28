@@ -3,78 +3,12 @@ using Payments.Core.Enums;
 namespace Payments.Core.Models.Responses;
 
 /// <summary>
-/// Result of a KYC/KYB verification initiation.
+/// Unified result for verification operations (KYC/KYB initiation, status, submission).
 /// </summary>
-public sealed class VerificationInitiationResult
+public sealed class VerificationResult
 {
     /// <summary>
-    /// Indicates if the initiation was successful.
-    /// </summary>
-    public required bool Success { get; init; }
-
-    /// <summary>
-    /// Verification session ID.
-    /// </summary>
-    public string? SessionId { get; init; }
-
-    /// <summary>
-    /// URL to redirect the user to for verification.
-    /// </summary>
-    public string? VerificationUrl { get; init; }
-
-    /// <summary>
-    /// Current verification status.
-    /// </summary>
-    public VerificationStatus? Status { get; init; }
-
-    /// <summary>
-    /// Error code (if failed).
-    /// </summary>
-    public string? ErrorCode { get; init; }
-
-    /// <summary>
-    /// Error message (if failed).
-    /// </summary>
-    public string? ErrorMessage { get; init; }
-
-    /// <summary>
-    /// Expiry time for the verification session.
-    /// </summary>
-    public DateTimeOffset? ExpiresAt { get; init; }
-
-    /// <summary>
-    /// Creates a successful result.
-    /// </summary>
-    public static VerificationInitiationResult Succeeded(
-        string sessionId,
-        string verificationUrl,
-        DateTimeOffset? expiresAt = null) => new()
-    {
-        Success = true,
-        SessionId = sessionId,
-        VerificationUrl = verificationUrl,
-        Status = VerificationStatus.Pending,
-        ExpiresAt = expiresAt
-    };
-
-    /// <summary>
-    /// Creates a failed result.
-    /// </summary>
-    public static VerificationInitiationResult Failed(string errorCode, string errorMessage) => new()
-    {
-        Success = false,
-        ErrorCode = errorCode,
-        ErrorMessage = errorMessage
-    };
-}
-
-/// <summary>
-/// Result of a verification status check.
-/// </summary>
-public sealed class VerificationStatusResult
-{
-    /// <summary>
-    /// Indicates if the query was successful.
+    /// Indicates if the operation was successful.
     /// </summary>
     public required bool Success { get; init; }
 
@@ -82,6 +16,16 @@ public sealed class VerificationStatusResult
     /// Customer ID.
     /// </summary>
     public string? CustomerId { get; init; }
+
+    /// <summary>
+    /// Verification session ID (for redirect-based verification).
+    /// </summary>
+    public string? SessionId { get; init; }
+
+    /// <summary>
+    /// URL to redirect the user to for verification (for redirect-based flows).
+    /// </summary>
+    public string? VerificationUrl { get; init; }
 
     /// <summary>
     /// Current verification status.
@@ -99,6 +43,16 @@ public sealed class VerificationStatusResult
     public VerificationInfo? Verification { get; init; }
 
     /// <summary>
+    /// Expiry time for the verification session.
+    /// </summary>
+    public DateTimeOffset? ExpiresAt { get; init; }
+
+    /// <summary>
+    /// Provider that processed the request.
+    /// </summary>
+    public PayoutProvider? Provider { get; init; }
+
+    /// <summary>
     /// Error code (if failed).
     /// </summary>
     public string? ErrorCode { get; init; }
@@ -109,77 +63,62 @@ public sealed class VerificationStatusResult
     public string? ErrorMessage { get; init; }
 
     /// <summary>
-    /// Creates a successful result.
+    /// Creates a successful initiation result.
     /// </summary>
-    public static VerificationStatusResult Succeeded(
+    public static VerificationResult InitiationSucceeded(
         string customerId,
-        VerificationInfo verification) => new()
+        string sessionId,
+        string? verificationUrl,
+        PayoutProvider provider,
+        DateTimeOffset? expiresAt = null) => new()
+    {
+        Success = true,
+        CustomerId = customerId,
+        SessionId = sessionId,
+        VerificationUrl = verificationUrl,
+        Status = VerificationStatus.Pending,
+        ExpiresAt = expiresAt,
+        Provider = provider
+    };
+
+    /// <summary>
+    /// Creates a successful status result.
+    /// </summary>
+    public static VerificationResult StatusSucceeded(
+        string customerId,
+        VerificationInfo verification,
+        PayoutProvider provider) => new()
     {
         Success = true,
         CustomerId = customerId,
         Status = verification.Status,
         Level = verification.Level,
-        Verification = verification
+        Verification = verification,
+        Provider = provider
     };
 
     /// <summary>
-    /// Creates a failed result.
+    /// Creates a successful submission result.
     /// </summary>
-    public static VerificationStatusResult Failed(string errorCode, string errorMessage) => new()
-    {
-        Success = false,
-        ErrorCode = errorCode,
-        ErrorMessage = errorMessage
-    };
-}
-
-/// <summary>
-/// Result of a document upload.
-/// </summary>
-public sealed class DocumentUploadResult
-{
-    /// <summary>
-    /// Indicates if the upload was successful.
-    /// </summary>
-    public required bool Success { get; init; }
-
-    /// <summary>
-    /// Document ID.
-    /// </summary>
-    public string? DocumentId { get; init; }
-
-    /// <summary>
-    /// Document status after upload.
-    /// </summary>
-    public VerificationStatus? Status { get; init; }
-
-    /// <summary>
-    /// Error code (if failed).
-    /// </summary>
-    public string? ErrorCode { get; init; }
-
-    /// <summary>
-    /// Error message (if failed).
-    /// </summary>
-    public string? ErrorMessage { get; init; }
-
-    /// <summary>
-    /// Creates a successful result.
-    /// </summary>
-    public static DocumentUploadResult Succeeded(string documentId) => new()
+    public static VerificationResult SubmissionSucceeded(
+        string customerId,
+        VerificationStatus status,
+        PayoutProvider provider) => new()
     {
         Success = true,
-        DocumentId = documentId,
-        Status = VerificationStatus.InReview
+        CustomerId = customerId,
+        Status = status,
+        Provider = provider
     };
 
     /// <summary>
     /// Creates a failed result.
     /// </summary>
-    public static DocumentUploadResult Failed(string errorCode, string errorMessage) => new()
+    public static VerificationResult Failed(string errorCode, string errorMessage, PayoutProvider? provider = null) => new()
     {
         Success = false,
         ErrorCode = errorCode,
-        ErrorMessage = errorMessage
+        ErrorMessage = errorMessage,
+        Provider = provider
     };
 }

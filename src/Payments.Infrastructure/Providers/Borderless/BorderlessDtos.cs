@@ -532,3 +532,233 @@ public sealed class BorderlessWebhookPayload
 }
 
 #endregion
+
+#region Customer Extended
+
+/// <summary>
+/// Request to update a customer.
+/// </summary>
+internal sealed class BorderlessUpdateCustomerRequest
+{
+    [JsonPropertyName("firstName")]
+    public string? FirstName { get; init; }
+
+    [JsonPropertyName("lastName")]
+    public string? LastName { get; init; }
+
+    [JsonPropertyName("companyName")]
+    public string? CompanyName { get; init; }
+
+    [JsonPropertyName("email")]
+    public string? Email { get; init; }
+
+    [JsonPropertyName("phone")]
+    public string? Phone { get; init; }
+
+    [JsonPropertyName("address")]
+    public BorderlessAddress? Address { get; init; }
+
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; init; }
+}
+
+/// <summary>
+/// Customer list response from Borderless API.
+/// </summary>
+internal sealed class BorderlessCustomerListResponse
+{
+    [JsonPropertyName("items")]
+    public IReadOnlyList<BorderlessCustomerResponse> Items { get; init; } = [];
+
+    [JsonPropertyName("total")]
+    public int Total { get; init; }
+
+    [JsonPropertyName("page")]
+    public int Page { get; init; }
+
+    [JsonPropertyName("limit")]
+    public int Limit { get; init; }
+}
+
+/// <summary>
+/// Offramp list response from Borderless API.
+/// </summary>
+internal sealed class BorderlessOfframpListResponse
+{
+    [JsonPropertyName("items")]
+    public IReadOnlyList<BorderlessOfframpResponse> Items { get; init; } = [];
+
+    [JsonPropertyName("total")]
+    public int Total { get; init; }
+
+    [JsonPropertyName("page")]
+    public int Page { get; init; }
+
+    [JsonPropertyName("limit")]
+    public int Limit { get; init; }
+}
+
+#endregion
+
+#region KYC/KYB
+
+/// <summary>
+/// KYC initiation request.
+/// </summary>
+internal sealed class BorderlessKycRequest
+{
+    [JsonPropertyName("customerId")]
+    public required string CustomerId { get; init; }
+
+    [JsonPropertyName("level")]
+    public string? Level { get; init; }
+
+    [JsonPropertyName("redirectUrl")]
+    public string? RedirectUrl { get; init; }
+
+    [JsonPropertyName("webhookUrl")]
+    public string? WebhookUrl { get; init; }
+}
+
+/// <summary>
+/// KYB initiation request.
+/// </summary>
+internal sealed class BorderlessKybRequest
+{
+    [JsonPropertyName("customerId")]
+    public required string CustomerId { get; init; }
+
+    [JsonPropertyName("level")]
+    public string? Level { get; init; }
+
+    [JsonPropertyName("redirectUrl")]
+    public string? RedirectUrl { get; init; }
+
+    [JsonPropertyName("webhookUrl")]
+    public string? WebhookUrl { get; init; }
+}
+
+/// <summary>
+/// KYC session response.
+/// </summary>
+internal sealed class BorderlessKycResponse
+{
+    [JsonPropertyName("sessionId")]
+    public required string SessionId { get; init; }
+
+    [JsonPropertyName("verificationUrl")]
+    public required string VerificationUrl { get; init; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; init; }
+
+    [JsonPropertyName("expiresAt")]
+    public DateTimeOffset? ExpiresAt { get; init; }
+}
+
+/// <summary>
+/// KYB session response.
+/// </summary>
+internal sealed class BorderlessKybResponse
+{
+    [JsonPropertyName("sessionId")]
+    public required string SessionId { get; init; }
+
+    [JsonPropertyName("verificationUrl")]
+    public required string VerificationUrl { get; init; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; init; }
+
+    [JsonPropertyName("expiresAt")]
+    public DateTimeOffset? ExpiresAt { get; init; }
+}
+
+/// <summary>
+/// Verification status response.
+/// </summary>
+internal sealed class BorderlessVerificationStatusResponse
+{
+    [JsonPropertyName("status")]
+    public string? Status { get; init; }
+
+    [JsonPropertyName("level")]
+    public string? Level { get; init; }
+
+    [JsonPropertyName("kycStatus")]
+    public string? KycStatus { get; init; }
+
+    [JsonPropertyName("kybStatus")]
+    public string? KybStatus { get; init; }
+
+    [JsonPropertyName("rejectionReason")]
+    public string? RejectionReason { get; init; }
+
+    [JsonPropertyName("submittedAt")]
+    public DateTimeOffset? SubmittedAt { get; init; }
+
+    [JsonPropertyName("completedAt")]
+    public DateTimeOffset? CompletedAt { get; init; }
+
+    [JsonPropertyName("expiresAt")]
+    public DateTimeOffset? ExpiresAt { get; init; }
+}
+
+/// <summary>
+/// Document upload request.
+/// </summary>
+internal sealed class BorderlessDocumentUploadRequest
+{
+    [JsonPropertyName("documentType")]
+    public required string DocumentType { get; init; }
+
+    [JsonPropertyName("documentNumber")]
+    public string? DocumentNumber { get; init; }
+
+    [JsonPropertyName("issuingCountry")]
+    public string? IssuingCountry { get; init; }
+
+    [JsonPropertyName("issueDate")]
+    public string? IssueDate { get; init; }
+
+    [JsonPropertyName("expiryDate")]
+    public string? ExpiryDate { get; init; }
+
+    [JsonPropertyName("frontImage")]
+    public required string FrontImage { get; init; }
+
+    [JsonPropertyName("backImage")]
+    public string? BackImage { get; init; }
+
+    [JsonPropertyName("contentType")]
+    public required string ContentType { get; init; }
+}
+
+/// <summary>
+/// Document response.
+/// </summary>
+internal sealed class BorderlessDocumentResponse
+{
+    [JsonPropertyName("documentId")]
+    public required string DocumentId { get; init; }
+
+    [JsonPropertyName("documentType")]
+    public string? DocumentType { get; init; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; init; }
+
+    [JsonPropertyName("createdAt")]
+    public DateTimeOffset CreatedAt { get; init; }
+}
+
+/// <summary>
+/// Document list response.
+/// </summary>
+internal sealed class BorderlessDocumentListResponse
+{
+    [JsonPropertyName("documents")]
+    public IReadOnlyList<BorderlessDocumentResponse> Documents { get; init; } = [];
+}
+
+#endregion

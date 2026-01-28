@@ -11,12 +11,14 @@ using Polly.Extensions.Http;
 namespace Payments.Infrastructure.Extensions;
 
 /// <summary>
-/// Extension methods for configuring payout services in the DI container.
+/// Extension methods for configuring payment services in the DI container.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds payout services to the service collection.
+    /// Adds unified payment services to the service collection.
+    /// This registers all payment providers (Mesta, Borderless) and services
+    /// for customer management, KYC/KYB, and stablecoin payouts.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">The configuration.</param>
@@ -31,38 +33,37 @@ public static class ServiceCollectionExtensions
         services.Configure<BorderlessSettings>(configuration.GetSection(BorderlessSettings.SectionName));
 
         // Get settings for conditional registration
-        var payoutSettings = configuration.GetSection(PayoutSettings.SectionName).Get<PayoutSettings>();
         var mestaSettings = configuration.GetSection(MestaSettings.SectionName).Get<MestaSettings>();
         var borderlessSettings = configuration.GetSection(BorderlessSettings.SectionName).Get<BorderlessSettings>();
 
         // Register Mesta provider if enabled
         if (mestaSettings?.Enabled == true)
         {
-            services.AddMestaProvider(mestaSettings);
+            services.AddMestaPaymentProvider(mestaSettings);
         }
 
         // Register Borderless provider if enabled
         if (borderlessSettings?.Enabled == true)
         {
-            services.AddBorderlessProvider(borderlessSettings);
+            services.AddBorderlessPaymentProvider(borderlessSettings);
         }
 
-        // Register core services
-        services.AddSingleton<IPayoutProviderFactory, PayoutProviderFactory>();
-        services.AddScoped<IPayoutService, PayoutService>();
-        services.AddScoped<ICustomerService, CustomerService>();
+        // Register unified services
+        services.AddSingleton<PaymentProviderFactory>();
+        services.AddScoped<UnifiedPaymentService>();
+        services.AddScoped<ApiVerificationService>();
 
         return services;
     }
 
     /// <summary>
-    /// Adds the Mesta payout provider.
+    /// Adds the Mesta payment provider with full support for customers, KYC/KYB, and payouts.
     /// </summary>
-    private static IServiceCollection AddMestaProvider(
+    private static IServiceCollection AddMestaPaymentProvider(
         this IServiceCollection services,
         MestaSettings settings)
     {
-        services.AddHttpClient<MestaPayoutProvider>(client =>
+        services.AddHttpClient<MestaPaymentProvider>(client =>
         {
             client.BaseAddress = new Uri(settings.BaseUrl.TrimEnd('/') + "/");
             client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
@@ -70,30 +71,19 @@ public static class ServiceCollectionExtensions
         .AddPolicyHandler(GetRetryPolicy(settings.RetryAttempts))
         .AddPolicyHandler(GetCircuitBreakerPolicy());
 
-        services.AddHttpClient<MestaCustomerProvider>(client =>
-        {
-            client.BaseAddress = new Uri(settings.BaseUrl.TrimEnd('/') + "/");
-            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
-        })
-        .AddPolicyHandler(GetRetryPolicy(settings.RetryAttempts))
-        .AddPolicyHandler(GetCircuitBreakerPolicy());
-
-        services.AddSingleton<IPayoutProvider, MestaPayoutProvider>();
-        services.AddSingleton<ICustomerProvider, MestaCustomerProvider>();
-        services.AddSingleton<IWebhookHandler>(sp => sp.GetRequiredService<IPayoutProvider>() as MestaPayoutProvider
-            ?? throw new InvalidOperationException("MestaPayoutProvider not registered"));
+        services.AddSingleton<IPaymentProvider, MestaPaymentProvider>();
 
         return services;
     }
 
     /// <summary>
-    /// Adds the Borderless payout provider.
+    /// Adds the Borderless payment provider with full support for customers, KYC/KYB, and payouts.
     /// </summary>
-    private static IServiceCollection AddBorderlessProvider(
+    private static IServiceCollection AddBorderlessPaymentProvider(
         this IServiceCollection services,
         BorderlessSettings settings)
     {
-        services.AddHttpClient<BorderlessPayoutProvider>(client =>
+        services.AddHttpClient<BorderlessPaymentProvider>(client =>
         {
             client.BaseAddress = new Uri(settings.BaseUrl.TrimEnd('/') + "/");
             client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
@@ -101,21 +91,7 @@ public static class ServiceCollectionExtensions
         .AddPolicyHandler(GetRetryPolicy(settings.RetryAttempts))
         .AddPolicyHandler(GetCircuitBreakerPolicy());
 
-        services.AddHttpClient<BorderlessCustomerProvider>(client =>
-        {
-            client.BaseAddress = new Uri(settings.BaseUrl.TrimEnd('/') + "/");
-            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
-        })
-        .AddPolicyHandler(GetRetryPolicy(settings.RetryAttempts))
-        .AddPolicyHandler(GetCircuitBreakerPolicy());
-
-        services.AddSingleton<IPayoutProvider, BorderlessPayoutProvider>();
-        services.AddSingleton<ICustomerProvider, BorderlessCustomerProvider>();
-        services.AddSingleton<IWebhookHandler>(sp =>
-        {
-            var providers = sp.GetServices<IPayoutProvider>();
-            return providers.OfType<BorderlessPayoutProvider>().First();
-        });
+        services.AddSingleton<IPaymentProvider, BorderlessPaymentProvider>();
 
         return services;
     }
